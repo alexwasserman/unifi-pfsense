@@ -49,7 +49,7 @@ if [ $(ps ax | grep -c "/usr/local/UniFi/lib/[a]ce.jar start") -ne 0 ]; then
 fi
 
 # Try and stop mongo first using the service
-/usr/local/bin/mongo --dbpath '/usr/local/UniFi/data/db' --shutdown
+/usr/local/bin/mongod --dbpath '/usr/local/UniFi/data/db' --shutdown
 
 # Check if mongo is still running by making sure mongodb doesn't have the db file open
 # killing it after if it's running:
