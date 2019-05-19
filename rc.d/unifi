@@ -58,7 +58,7 @@ unifi_stop()
 
     echo " done."
 
-    echo "Waiting"
+    echo "Waiting for the PID file to clear..."
     # ...then we wait until the service identified by the pid file goes away:
     while [ `pgrep -F $pidfile` ]; do
       echo -n "."
