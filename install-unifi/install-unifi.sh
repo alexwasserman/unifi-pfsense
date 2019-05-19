@@ -7,7 +7,7 @@
 UNIFI_SOFTWARE_URL="http://dl.ubnt.com/unifi/5.10.23/UniFi.unix.zip"
 
 # The rc script associated with this branch or fork:
-RC_SCRIPT_URL="https://raw.githubusercontent.com/gozoinks/unifi-pfsense/master/rc.d/unifi.sh"
+RC_SCRIPT_URL="https://raw.githubusercontent.com/alexwasserman/unifi-pfsense/master/rc.d/unifi.sh"
 
 
 # If pkg-ng is not yet installed, bootstrap it:
@@ -47,7 +47,11 @@ if [ $(ps ax | grep -c "/usr/local/UniFi/lib/[a]ce.jar start") -ne 0 ]; then
   echo " done."
 fi
 
-# And then make sure mongodb doesn't have the db file open:
+# Try and stop mongo first.
+/usr/bin/service mongo stop
+
+# And then make sure mongodb doesn't have the db file open
+# killing it after if it's running:
 if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
   echo -n "Killing mongod process..."
   /bin/kill -15 `ps ax | grep "/usr/local/UniFi/data/[d]b" | awk '{ print $1 }'`
@@ -190,11 +194,11 @@ fi
 
 # Fetch the rc script from github:
 echo -n "Installing rc script..."
-/usr/bin/fetch -o /usr/local/etc/rc.d/unifi.sh ${RC_SCRIPT_URL}
+/usr/bin/fetch -o /usr/local/etc/rc.d/unifi ${RC_SCRIPT_URL}
 echo " done."
 
 # Fix permissions so it'll run
-chmod +x /usr/local/etc/rc.d/unifi.sh
+chmod +x /usr/local/etc/rc.d/unifi
 
 # Add the startup variable to rc.conf.local.
 # Eventually, this step will need to be folded into pfSense, which manages the main rc.conf.
@@ -214,5 +218,5 @@ fi
 
 # Start it up:
 echo -n "Starting the unifi service..."
-/usr/sbin/service unifi.sh start
+/usr/sbin/service unifi start
 echo " done."
