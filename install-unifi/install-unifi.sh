@@ -63,6 +63,8 @@ if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
   echo " done."
 fi
 
+echo "Mongo stopped"
+
 # If an installation exists, we'll need to back up configuration:
 if [ -d /usr/local/UniFi/data ]; then
   echo "Backing up UniFi data to /var/backups"

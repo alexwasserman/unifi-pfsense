@@ -38,7 +38,7 @@ unifi_stop()
 {
 
   if [ -f $pidfile ]; then
-    echo -n "Signaling the UniFi controller to stop..."
+    echo "Signaling the UniFi controller to stop..."
 
     # This process does take a while, but the stop command finishes before
     # the service is actually stopped. So we start it in the background:
@@ -46,7 +46,9 @@ unifi_stop()
 
     # Get the pid of the stopper:
     stopper=$!
-
+    
+		echo -n "Waiting"
+		
     # Wait until the stopper finishes:
     while [ `pgrep $stopper` ]; do
       echo -n "."
@@ -54,8 +56,9 @@ unifi_stop()
     done
 
     echo " acknowledged."
-    echo -n "Waiting for the UniFi controller to stop (this can take a long time)..."
+    echo "The UniFi controller can take a while to stop..."
 
+    echo "Waiting"
     # ...then we wait until the service identified by the pid file goes away:
     while [ `pgrep -F $pidfile` ]; do
       echo -n "."
@@ -65,13 +68,16 @@ unifi_stop()
     # Remove the pid file:
     rm $pidfile
 
-    echo " stopped.";
+    echo "UniFi controller stopped.";
   else
     echo "There is no pid file. The controller may not be running."
   fi
 	
-	echo "Clean up mongo"
-	/usr/local/bin/mongo --dbpath '/usr/local/UniFi/data/db' --shutdown
+	# Try and stop mongo first using mongo itself
+	echo "Stopping Mongo"
+	if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
+	  /usr/local/bin/mongo --port 27117 --eval "db.getSiblingDB('admin').shutdownServer()"
+	fi
 }
 
 run_rc_command "$1"
