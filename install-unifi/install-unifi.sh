@@ -63,7 +63,7 @@ fi
 if [ -d /usr/local/UniFi/data ]; then
   echo "Backing up UniFi data to /var/backups"
   BACKUPFILE=/var/backups/unifi-`date +"%Y%m%d_%H%M%S"`.tgz
-  /usr/bin/tar -vczf ${BACKUPFILE} /usr/local/UniFi/data
+  /usr/bin/tar -czf ${BACKUPFILE} /usr/local/UniFi/data
 fi
 
 # Add the fstab entries apparently required for OpenJDKse:
@@ -87,12 +87,12 @@ echo " done."
 # Install mongodb, OpenJDK, and unzip (required to unpack Ubiquiti's download):
 # -F skips a package if it's already installed, without throwing an error.
 echo "Installing required packages..."
-tar xv -C / -f /usr/local/share/pfSense/base.txz ./usr/bin/install
+tar x -C / -f /usr/local/share/pfSense/base.txz ./usr/bin/install
 #uncomment below for pfSense 2.2.x:
 #env ASSUME_ALWAYS_YES=YES /usr/sbin/pkg install mongodb openjdk unzip pcre v8 snappy
 
 fetch ${FREEBSD_PACKAGE_LIST_URL}
-tar vfx packagesite.txz
+tar fx packagesite.txz
 
 AddPkg () {
  	pkgname=$1
@@ -164,7 +164,7 @@ echo " done."
 # Unpack the archive into the /usr/local directory:
 # (the -o option overwrites the existing files without complaining)
 echo -n "Installing UniFi controller in /usr/local..."
-/usr/local/bin/unzip -o UniFi.unix.zip -d /usr/local
+/usr/local/bin/unzip -q -o UniFi.unix.zip -d /usr/local
 echo " done."
 
 # Update Unifi's symbolic link for mongod to point to the version we just installed:
@@ -214,7 +214,7 @@ fi
 if [ ! -z "${BACKUPFILE}" ] && [ -f ${BACKUPFILE} ]; then
   echo "Restoring UniFi data..."
   mv /usr/local/UniFi/data /usr/local/UniFi/data-`date +%Y%m%d-%H%M`
-  /usr/bin/tar -vxzf ${BACKUPFILE} -C /
+  /usr/bin/tar -xzf ${BACKUPFILE} -C /
 fi
 
 # Start it up:
