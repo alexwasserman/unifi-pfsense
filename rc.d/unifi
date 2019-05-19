@@ -74,9 +74,19 @@ unifi_stop()
   fi
 	
 	# Try and stop mongo first using mongo itself
-	echo "Stopping Mongo"
 	if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
+		echo -n "Stopping Mongo..."
 	  /usr/local/bin/mongo --port 27117 --eval "db.getSiblingDB('admin').shutdownServer()"
+	  echo " done."
+	fi
+
+	# Check if mongo is still running by making sure mongodb doesn't have the db file open
+	# killing it after if it's running:
+	if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
+		echo "Mongo is still running"
+	  echo -n "Killing mongod process..."
+	  /bin/kill -15 `ps ax | grep "/usr/local/UniFi/data/[d]b" | awk '{ print $1 }'`
+	  echo " done."
 	fi
 }
 
