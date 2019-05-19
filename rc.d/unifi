@@ -47,11 +47,11 @@ unifi_stop()
     # Get the pid of the stopper:
     stopper=$!
     
-		echo -n " done."
+		echo " done."
     echo "The UniFi controller can take a while to stop..."
-		echo -n "Waiting for UniFi controll to stop..."
+		echo -n "Waiting for UniFi controller to stop..."
     # Wait until the stopper finishes:
-    while [ `pgrep stop | echo $?` ]; do
+    while [ `ps -p $stopper  > /dev/null 2>&1` ]; do
       echo -n "."
       sleep 5
     done
