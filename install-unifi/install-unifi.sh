@@ -12,7 +12,7 @@ RC_SCRIPT_URL="https://raw.githubusercontent.com/alexwasserman/unifi-pfsense/mas
 
 # If pkg-ng is not yet installed, bootstrap it:
 if ! /usr/sbin/pkg -N 2> /dev/null; then
-  echo "FreeBSD pkgng not installed. Installing..."
+  echo -n "FreeBSD pkgng not installed. Installing..."
   env ASSUME_ALWAYS_YES=YES /usr/sbin/pkg bootstrap
   echo " done."
 fi
@@ -36,7 +36,7 @@ FREEBSD_PACKAGE_LIST_URL="https://pkg.freebsd.org/${ABI}/latest/packagesite.txz"
 # First let's try the rc script if it exists:
 if [ -f /usr/local/etc/rc.d/unifi ]; then
 	echo "Unifi already installed"
-  echo "Stopping the unifi service..."
+  echo -n "Stopping the unifi service..."
   /usr/sbin/service unifi stop
   echo " done."
 fi
@@ -49,16 +49,17 @@ if [ $(ps ax | grep -c "/usr/local/UniFi/lib/[a]ce.jar start") -ne 0 ]; then
 fi
 
 # Try and stop mongo first using mongo itself
-echo "Stopping Mongo"
 if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
+	echo -n "Stopping Mongo..."
   /usr/local/bin/mongo --port 27117 --eval "db.getSiblingDB('admin').shutdownServer()"
+  echo " done."
 fi
 
 # Check if mongo is still running by making sure mongodb doesn't have the db file open
 # killing it after if it's running:
 if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
 	echo "Mongo is still running"
-  echo "Killing mongod process..."
+  echo -n "Killing mongod process..."
   /bin/kill -15 `ps ax | grep "/usr/local/UniFi/data/[d]b" | awk '{ print $1 }'`
   echo " done."
 fi
@@ -67,26 +68,27 @@ echo "Mongo stopped"
 
 # If an installation exists, we'll need to back up configuration:
 if [ -d /usr/local/UniFi/data ]; then
-  echo "Backing up UniFi data to /var/backups"
+  echo -n "Backing up UniFi data to /var/backups ..."
   BACKUPFILE=/var/backups/unifi-`date +"%Y%m%d_%H%M%S"`.tgz
   /usr/bin/tar -czf ${BACKUPFILE} /usr/local/UniFi/data
+	echo " done."
 fi
 
 # Add the fstab entries apparently required for OpenJDKse:
 if [ $(grep -c fdesc /etc/fstab) -eq 0 ]; then
-  echo "Adding fdesc filesystem to /etc/fstab..."
+  echo -n "Adding fdesc filesystem to /etc/fstab..."
   echo -e "fdesc\t\t\t/dev/fd\t\tfdescfs\trw\t\t0\t0" >> /etc/fstab
   echo " done."
 fi
 
 if [ $(grep -c proc /etc/fstab) -eq 0 ]; then
-  echo "Adding procfs filesystem to /etc/fstab..."
+  echo -n "Adding procfs filesystem to /etc/fstab..."
   echo -e "proc\t\t\t/proc\t\tprocfs\trw\t\t0\t0" >> /etc/fstab
   echo " done."
 fi
 
 # Run mount to mount the two new filesystems:
-echo "Mounting new filesystems..."
+echo -n "Mounting new filesystems..."
 /sbin/mount -a
 echo " done."
 
@@ -157,7 +159,7 @@ AddPkg snappyjava
 # Clean up downloaded package manifest:
 rm packagesite.*
 
-echo " done."
+echo "Package installation complete"
 
 # Switch to a temp directory for the Unifi download:
 cd `mktemp -d -t unifi`
@@ -211,7 +213,7 @@ chmod +x /usr/local/etc/rc.d/unifi
 # Eventually, this step will need to be folded into pfSense, which manages the main rc.conf.
 # In the following comparison, we expect the 'or' operator to short-circuit, to make sure the file exists and avoid grep throwing an error.
 if [ ! -f /etc/rc.conf.local ] || [ $(grep -c unifi_enable /etc/rc.conf.local) -eq 0 ]; then
-  echo "Enabling the unifi service..."
+  echo -n "Enabling the unifi service..."
   echo "unifi_enable=YES" >> /etc/rc.conf.local
   echo " done."
 fi
@@ -224,6 +226,6 @@ if [ ! -z "${BACKUPFILE}" ] && [ -f ${BACKUPFILE} ]; then
 fi
 
 # Start it up:
-echo "Starting the unifi service..."
+echo -n "Starting the unifi service..."
 /usr/sbin/service unifi start
 echo " done."

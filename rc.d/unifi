@@ -38,7 +38,7 @@ unifi_stop()
 {
 
   if [ -f $pidfile ]; then
-    echo "Signaling the UniFi controller to stop..."
+    echo -n "Signaling the UniFi controller to stop..."
 
     # This process does take a while, but the stop command finishes before
     # the service is actually stopped. So we start it in the background:
@@ -47,16 +47,16 @@ unifi_stop()
     # Get the pid of the stopper:
     stopper=$!
     
-		echo -n "Waiting"
-		
+		echo -n " done."
+    echo "The UniFi controller can take a while to stop..."
+		echo -n "Waiting for UniFi controll to stop..."
     # Wait until the stopper finishes:
-    while [ `pgrep $stopper` ]; do
+    while [ `pgrep stop | echo $?` ]; do
       echo -n "."
       sleep 5
     done
 
-    echo " acknowledged."
-    echo "The UniFi controller can take a while to stop..."
+    echo " done."
 
     echo "Waiting"
     # ...then we wait until the service identified by the pid file goes away:
