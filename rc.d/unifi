@@ -2,7 +2,9 @@
 
 # REQUIRE: FILESYSTEMS
 # REQUIRE: NETWORKING
+# REQUIRE: mongod
 # PROVIDE: unifi
+# KEYWORD: shutdown
 
 . /etc/rc.subr
 
@@ -67,6 +69,9 @@ unifi_stop()
   else
     echo "There is no pid file. The controller may not be running."
   fi
+	
+	echo "Clean up mongo"
+	/usr/local/bin/mongo --dbpath '/usr/local/UniFi/data/db' --shutdown
 }
 
 run_rc_command "$1"

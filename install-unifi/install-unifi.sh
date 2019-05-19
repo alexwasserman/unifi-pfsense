@@ -7,7 +7,7 @@
 UNIFI_SOFTWARE_URL="http://dl.ubnt.com/unifi/5.10.23/UniFi.unix.zip"
 
 # The rc script associated with this branch or fork:
-RC_SCRIPT_URL="https://raw.githubusercontent.com/alexwasserman/unifi-pfsense/master/rc.d/unifi.sh"
+RC_SCRIPT_URL="https://raw.githubusercontent.com/alexwasserman/unifi-pfsense/master/rc.d/unifi"
 
 
 # If pkg-ng is not yet installed, bootstrap it:
@@ -34,9 +34,10 @@ FREEBSD_PACKAGE_LIST_URL="https://pkg.freebsd.org/${ABI}/latest/packagesite.txz"
 
 # Stop the controller if it's already running...
 # First let's try the rc script if it exists:
-if [ -f /usr/local/etc/rc.d/unifi.sh ]; then
+if [ -f /usr/local/etc/rc.d/unifi ]; then
+	echo -n "Unifi already installed"
   echo -n "Stopping the unifi service..."
-  /usr/sbin/service unifi.sh stop
+  /usr/sbin/service unifi stop
   echo " done."
 fi
 
@@ -47,10 +48,10 @@ if [ $(ps ax | grep -c "/usr/local/UniFi/lib/[a]ce.jar start") -ne 0 ]; then
   echo " done."
 fi
 
-# Try and stop mongo first.
-/usr/bin/service mongo stop
+# Try and stop mongo first using the service
+/usr/local/bin/mongo --dbpath '/usr/local/UniFi/data/db' --shutdown
 
-# And then make sure mongodb doesn't have the db file open
+# Check if mongo is still running by making sure mongodb doesn't have the db file open
 # killing it after if it's running:
 if [ $(ps ax | grep -c "/usr/local/UniFi/data/[d]b") -ne 0 ]; then
   echo -n "Killing mongod process..."
@@ -60,7 +61,7 @@ fi
 
 # If an installation exists, we'll need to back up configuration:
 if [ -d /usr/local/UniFi/data ]; then
-  echo "Backing up UniFi data..."
+  echo "Backing up UniFi data to /var/backups"
   BACKUPFILE=/var/backups/unifi-`date +"%Y%m%d_%H%M%S"`.tgz
   /usr/bin/tar -vczf ${BACKUPFILE} /usr/local/UniFi/data
 fi
